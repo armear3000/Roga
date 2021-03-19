@@ -168,6 +168,11 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DevicesAndButtons.h" />
+    <ClInclude Include="Geometry.h" />
+    <ClInclude Include="SystemFun.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="packages\AllegroDeps.1.12.0\build\native\AllegroDeps.targets" Condition="Exists('packages\AllegroDeps.1.12.0\build\native\AllegroDeps.targets')" />

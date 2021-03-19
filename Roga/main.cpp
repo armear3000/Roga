@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <deque>
+#include <tuple>
 #include <algorithm>
 #include <iterator>
 
@@ -35,6 +36,7 @@ keyboards kboard;
 
 ALLEGRO_FONT* font24 = NULL;
 
+using namespace std;
 ////////////////////
 
 // сетка 40 на 30
@@ -56,8 +58,10 @@ public:
 	int len;
 	int x, y;
 	int dx, dy;
+	int lx, ly;
+	int ldx, ldy;
 	int speed;
-
+	deque<tuple<int,int,int,int>> kuveve;
 
 	void control();
 	void go();
@@ -69,13 +73,16 @@ private:
 };
 player::player()
 {
+	len = 6;
 	speed = 1;
 	x = 10;
 	y = 10;
-	len = 3;
 	dx = 1;
 	dy = 0;
-
+	lx = x - len;
+	ly = y;
+	ldx = dx;
+	ldy = dy;
 }
 player::~player()
 {
@@ -85,11 +92,17 @@ void player::control()
 	if (dx == 0) {
 		dx = -kboard.key[ALLEGRO_KEY_A];
 		if(dx == 0)	dx = kboard.key[ALLEGRO_KEY_D];
-		if (dx != 0) dy = 0;
+		if (dx != 0) { 
+			dy = 0;
+			kuveve.push_back({ x, y, dx, dy });
+		}
 	} else if (dy == 0) {
 		dy = -kboard.key[ALLEGRO_KEY_W];
 		if (dy == 0) dy = kboard.key[ALLEGRO_KEY_S];
-		if (dy != 0) dx = 0;
+		if (dy != 0) {
+			dx = 0;
+			kuveve.push_back({ x, y, dx, dy });
+		}
 	}
 		
 }
@@ -97,9 +110,23 @@ void player::go()
 {
 	x += dx * speed;
 	y += dy * speed;
+
+	lx += ldx * speed;
+	ly += ldy * speed;
+
+	int tx, ty, tdx, tdy;
+	if (!kuveve.empty()) {
+		tie(tx, ty, tdx, tdy) = kuveve.front();
+		if (tie(tx, ty) == tie(lx, ly)) {
+			tie(ldx, ldy) = tie(tdx, tdy);
+			kuveve.pop_front();
+		}
+	}
+
 }
 void player::draw()
 {
+	al_draw_filled_rectangle(lx * title_size, ly * title_size, lx * title_size + title_size, ly * title_size + title_size, al_map_rgb(255, 255, 255));
 	al_draw_filled_rectangle(x * title_size, y * title_size, x * title_size + title_size, y * title_size + title_size, al_map_rgb(255, 255, 255));
 
 }

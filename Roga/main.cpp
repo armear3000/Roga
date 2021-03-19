@@ -1,16 +1,110 @@
 #define _CRT_SECURE_NO_WARNINGS
 
+#include <cstdlib>
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro5.h>
+#include <allegro5/allegro_image.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_native_dialog.h>
+#include <math.h>
+#include <stdio.h> 
+#include <conio.h>
+#include <stdlib.h>
+#include <Windows.h>
+
+#include <iostream>
+
+#include <vector>
+#include <deque>
+#include <algorithm>
+#include <iterator>
+
+#include "Geometry.h"
+#include "SystemFun.h"
+#include "DevicesAndButtons.h"
 
 
-ClassGamePlay Gameplay;
-ClassNewGame NewGame;
-ClassLoadGame LoadGame;
-ClassMenu Menu;
-ClassSettings Settings;
-ClassAbout About;
-ClassExit Exit;
+ALLEGRO_DISPLAY* display;
+int width = 800;
+int height = 600;
+
+mouses mouse;
+keyboards kboard;
+
+ALLEGRO_FONT* font24 = NULL;
 
 ////////////////////
+
+// сетка 40 на 30
+const int max_x = 40;
+const int max_y = 30;
+const int title_size = 20;
+int map[max_y][max_x];
+
+void draw_map();
+//
+
+class player
+{
+public:
+	player();
+	~player();
+	
+	bool life;
+	int len;
+	int x, y;
+	int dx, dy;
+	int speed;
+
+
+	void control();
+	void go();
+	void draw();
+
+
+private:
+
+};
+player::player()
+{
+	speed = 1;
+	x = 10;
+	y = 10;
+	len = 3;
+	dx = 1;
+	dy = 0;
+
+}
+player::~player()
+{
+}
+void player::control()
+{
+	if (dx == 0) {
+		dx = -kboard.key[ALLEGRO_KEY_A];
+		if(dx == 0)	dx = kboard.key[ALLEGRO_KEY_D];
+		if (dx != 0) dy = 0;
+	} else if (dy == 0) {
+		dy = -kboard.key[ALLEGRO_KEY_W];
+		if (dy == 0) dy = kboard.key[ALLEGRO_KEY_S];
+		if (dy != 0) dx = 0;
+	}
+		
+}
+void player::go()
+{
+	x += dx * speed;
+	y += dy * speed;
+}
+void player::draw()
+{
+	al_draw_filled_rectangle(x * title_size, y * title_size, x * title_size + title_size, y * title_size + title_size, al_map_rgb(255, 255, 255));
+
+}
+
+player snake;
 
 int main()
 {
@@ -18,11 +112,12 @@ int main()
 	ALLEGRO_EVENT ev;
 	ALLEGRO_EVENT_QUEUE* event_queue = NULL;
 	ALLEGRO_TIMER* fps = NULL;
+	ALLEGRO_TIMER* cps = NULL;
 
 	if (!al_init()) exit(1);
 	display = al_create_display(width, height);
-	al_set_display_flag(display, ALLEGRO_FULLSCREEN_WINDOW, true);
-	FullScreenXY();
+	al_set_display_flag(display, 0, true);
+	//al_set_display_flag(display, ALLEGRO_FULLSCREEN_WINDOW, true);
 	if (!display) exit(1);
 
 	al_init_font_addon();
@@ -34,8 +129,10 @@ int main()
 
 	event_queue = al_create_event_queue();
 	fps = al_create_timer(1 / 60.0);
+	cps = al_create_timer(1 / 5.0);
 
 	al_register_event_source(event_queue, al_get_timer_event_source(fps));
+	al_register_event_source(event_queue, al_get_timer_event_source(cps));
 	al_register_event_source(event_queue, al_get_display_event_source(display));
 	al_register_event_source(event_queue, al_get_mouse_event_source());
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
@@ -49,16 +146,9 @@ int main()
 
 	////////////////// init
 
-	Gameplay.init();
-	NewGame.init();
-	LoadGame.init();
-	Menu.init();
-	Settings.init();
-	About.init();
-	Exit.init();
-
 	bool done = false, draw = false;
 	al_start_timer(fps);
+	al_start_timer(cps);
 
 	for (; !done;) {
 		al_wait_for_event(event_queue, &ev);
@@ -73,31 +163,6 @@ int main()
 			mouse.key[ev.mouse.button - 1] = true;
 			mouse_click = ev.mouse.button;
 
-			switch (state) {
-			case GAMEPLAY:
-				Gameplay.matmousedown();
-				break;
-			case NEWGAME:
-				NewGame.matmousedown();
-				break;
-			case LOADGAME:
-				LoadGame.matmousedown();
-				break;
-			case MENU:
-				Menu.matmousedown();
-				break;
-			case SETTINGS:
-				Settings.matmousedown();
-				break;
-			case ABOUT:
-				About.matmousedown();
-				break;
-			case EXIT:
-
-				break;
-			default:
-				break;
-			}
 
 		}
 		if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {
@@ -108,42 +173,6 @@ int main()
 		if (ev.type == ALLEGRO_EVENT_KEY_DOWN) {
 			kboard.key[ev.keyboard.keycode] = true;
 
-			if (kboard.key[ALLEGRO_KEY_LSHIFT]) {
-				if (kboard.key[ALLEGRO_KEY_1]) SetState(GAMEPLAY);
-				if (kboard.key[ALLEGRO_KEY_2]) SetState(NEWGAME);
-				if (kboard.key[ALLEGRO_KEY_3]) SetState(LOADGAME);
-				if (kboard.key[ALLEGRO_KEY_4]) SetState(MENU);
-				if (kboard.key[ALLEGRO_KEY_5]) SetState(SETTINGS);
-				if (kboard.key[ALLEGRO_KEY_6]) SetState(ABOUT);
-				if (kboard.key[ALLEGRO_KEY_7]) SetState(EXIT);
-
-			}
-
-			switch (state) {
-			case GAMEPLAY:
-				Gameplay.matdown();
-				break;
-			case NEWGAME:
-				NewGame.matdown();
-				break;
-			case LOADGAME:
-
-				break;
-			case MENU:
-
-				break;
-			case SETTINGS:
-
-				break;
-			case ABOUT:
-
-				break;
-			case EXIT:
-
-				break;
-			default:
-				break;
-			}
 		}
 		if (ev.type == ALLEGRO_EVENT_KEY_UP) {
 			kboard.key[ev.keyboard.keycode] = false;
@@ -151,75 +180,28 @@ int main()
 
 
 		if (ev.type == ALLEGRO_EVENT_TIMER) {                    // игровой процесс
+			
 			if (ev.timer.source == fps) {
 				draw = true;
 
-				switch (state) {
-				case GAMEPLAY:
-					Gameplay.mat();
-					break;
-				case NEWGAME:
-					NewGame.mat();
-					break;
-				case LOADGAME:
-					LoadGame.mat();
-					break;
-				case MENU:
-
-					break;
-				case SETTINGS:
-					Settings.mat();
-					break;
-				case ABOUT:
-					About.mat();
-					break;
-				case EXIT:
-
-					return 1;
-					break;
-				default:
-					break;
-				}
-
-
+				
+				
 				mouse_click = 0;
 			}
-			NewGame.timers(ev);
-
+			if (ev.timer.source == cps) {
+				snake.control();
+				snake.go();
+			}
 		}
-
-
 
 		if (draw && al_is_event_queue_empty(event_queue)) {      // отрисовка 
 			draw = false;
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 			//al_draw_filled_rectangle(0,0,width,height,al_map_rgba(0,0,0,10));
 
-			switch (state) {
-			case GAMEPLAY:
-				Gameplay.draw();
-				break;
-			case NEWGAME:
-				NewGame.draw();
-				break;
-			case LOADGAME:
-				LoadGame.draw();
-				break;
-			case MENU:
-				Menu.draw();
-				break;
-			case SETTINGS:
-				Settings.draw();
-				break;
-			case ABOUT:
-				About.draw();
-				break;
-			case EXIT:
+			draw_map();
 
-				break;
-			default:
-				break;
-			}
+			snake.draw();
 
 
 			al_flip_display();
@@ -227,20 +209,21 @@ int main()
 	}
 
 	// конец работы 
-	Gameplay.destroy();
-	LoadGame.destroy();
-	NewGame.destroy();
-	Menu.destroy();
-	Settings.destroy();
-	About.destroy();
-	Exit.destroy();
 
 	al_destroy_font(font24);
 	al_destroy_timer(fps);
+	al_destroy_timer(cps);
 	al_destroy_display(display);
 	al_destroy_event_queue(event_queue);
 	return 0;
 }
 
-
+void draw_map()
+{
+	for (int y = 0; y < max_y; ++y) {
+		for (int x = 0; x < max_x; ++x) {
+			al_draw_rectangle(x * title_size, y * title_size, x * title_size + title_size, y * title_size + title_size, al_map_rgb(20, 20, 20), 1);
+		}
+	}
+}
 

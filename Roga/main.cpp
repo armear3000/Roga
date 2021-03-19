@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <deque>
+#include <tuple>
 #include <algorithm>
 #include <iterator>
 
@@ -35,6 +36,7 @@ keyboards kboard;
 
 ALLEGRO_FONT* font24 = NULL;
 
+using namespace std;
 ////////////////////
 
 // сетка 40 на 30
@@ -56,8 +58,10 @@ public:
 	int len;
 	int x, y;
 	int dx, dy;
+	int lx, ly;
+	int ldx, ldy;
 	int speed;
-
+	deque<tuple<int,int,int,int>> kuveve;
 
 	void control();
 	void go();
@@ -69,37 +73,83 @@ private:
 };
 player::player()
 {
+	len = 6;
 	speed = 1;
 	x = 10;
 	y = 10;
-	len = 3;
 	dx = 1;
 	dy = 0;
-
+	lx = x - len;
+	ly = y;
+	ldx = dx;
+	ldy = dy;
 }
 player::~player()
 {
 }
 void player::control()
 {
-	if (dx == 0) {
+	/*if (dx == 0) {
 		dx = -kboard.key[ALLEGRO_KEY_A];
 		if(dx == 0)	dx = kboard.key[ALLEGRO_KEY_D];
-		if (dx != 0) dy = 0;
+		if (dx != 0) { 
+			dy = 0;
+			kuveve.push_back({ x, y, dx, dy });
+		}
 	} else if (dy == 0) {
 		dy = -kboard.key[ALLEGRO_KEY_W];
 		if (dy == 0) dy = kboard.key[ALLEGRO_KEY_S];
-		if (dy != 0) dx = 0;
+		if (dy != 0) {
+			dx = 0;
+			kuveve.push_back({ x, y, dx, dy });
+		}
+	}*/
+	if (kboard.key[ALLEGRO_KEY_A] && dx != 1) {
+		dx = -1;
+		dy = 0;
+		kuveve.push_back({ x, y, dx, dy });
+	}
+	else if (kboard.key[ALLEGRO_KEY_D] && dx != -1) {
+		dx = 1;
+		dy = 0;
+		kuveve.push_back({ x, y, dx, dy });
+	}
+	else if (kboard.key[ALLEGRO_KEY_W] && dy != 1) {
+		dx = 0;
+		dy = -1;
+		kuveve.push_back({ x, y, dx, dy });
+	}
+	else if (kboard.key[ALLEGRO_KEY_S] && dy != -1) {
+		dx = 0;
+		dy = 1;
+		kuveve.push_back({ x, y, dx, dy });
 	}
 		
 }
 void player::go()
 {
+	map[y][x] = 1;
+	map[ly][lx] = 0;
+
 	x += dx * speed;
 	y += dy * speed;
+
+	lx += ldx * speed;
+	ly += ldy * speed;
+
+	int tx, ty, tdx, tdy;
+	if (!kuveve.empty()) {
+		tie(tx, ty, tdx, tdy) = kuveve.front();
+		if (tie(tx, ty) == tie(lx, ly)) {
+			tie(ldx, ldy) = tie(tdx, tdy);
+			kuveve.pop_front();
+		}
+	}
+
 }
 void player::draw()
 {
+	al_draw_filled_rectangle(lx * title_size, ly * title_size, lx * title_size + title_size, ly * title_size + title_size, al_map_rgb(150, 150, 150));
 	al_draw_filled_rectangle(x * title_size, y * title_size, x * title_size + title_size, y * title_size + title_size, al_map_rgb(255, 255, 255));
 
 }
@@ -113,6 +163,7 @@ int main()
 	ALLEGRO_EVENT_QUEUE* event_queue = NULL;
 	ALLEGRO_TIMER* fps = NULL;
 	ALLEGRO_TIMER* cps = NULL;
+	bool flag_cps = false;
 
 	if (!al_init()) exit(1);
 	display = al_create_display(width, height);
@@ -184,13 +235,18 @@ int main()
 			if (ev.timer.source == fps) {
 				draw = true;
 
-				
+
+				snake.control();
+
+				if (flag_cps) {
+					snake.go();
+					flag_cps = false;
+				}
 				
 				mouse_click = 0;
 			}
 			if (ev.timer.source == cps) {
-				snake.control();
-				snake.go();
+				flag_cps = true;
 			}
 		}
 
@@ -222,7 +278,13 @@ void draw_map()
 {
 	for (int y = 0; y < max_y; ++y) {
 		for (int x = 0; x < max_x; ++x) {
-			al_draw_rectangle(x * title_size, y * title_size, x * title_size + title_size, y * title_size + title_size, al_map_rgb(20, 20, 20), 1);
+				al_draw_rectangle(x * title_size, y * title_size, x * title_size + title_size, y * title_size + title_size, al_map_rgb(20, 20, 20), 1);
+		}
+	}
+	for (int y = 0; y < max_y; ++y) {
+		for (int x = 0; x < max_x; ++x) {
+			 if (map[y][x] == 1)
+				al_draw_filled_rectangle(x * title_size, y * title_size, x * title_size + title_size, y * title_size + title_size, al_map_rgb(200, 200, 200));
 		}
 	}
 }

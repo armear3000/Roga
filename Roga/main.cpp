@@ -12,6 +12,8 @@
 #include <stdio.h> 
 #include <conio.h>
 #include <stdlib.h>
+#include <cstdlib>
+#include <time.h>
 #include <Windows.h>
 
 #include <iostream>
@@ -26,6 +28,8 @@
 #include "SystemFun.h"
 #include "DevicesAndButtons.h"
 
+using namespace std;
+
 
 ALLEGRO_DISPLAY* display;
 int width = 800;
@@ -36,7 +40,7 @@ keyboards kboard;
 
 ALLEGRO_FONT* font24 = NULL;
 
-using namespace std;
+
 ////////////////////
 
 // ����� 40 �� 30
@@ -73,6 +77,7 @@ private:
 };
 player::player()
 {
+	life = true;
 	len = 6;
 	speed = 1;
 	x = 10;
@@ -89,53 +94,52 @@ player::~player()
 }
 void player::control()
 {
-	/*if (dx == 0) {
-		dx = -kboard.key[ALLEGRO_KEY_A];
-		if(dx == 0)	dx = kboard.key[ALLEGRO_KEY_D];
-		if (dx != 0) { 
-			dy = 0;
-			kuveve.push_back({ x, y, dx, dy });
-		}
-	} else if (dy == 0) {
-		dy = -kboard.key[ALLEGRO_KEY_W];
-		if (dy == 0) dy = kboard.key[ALLEGRO_KEY_S];
-		if (dy != 0) {
-			dx = 0;
-			kuveve.push_back({ x, y, dx, dy });
-		}
-	}*/
 	if (kboard.last_key[ALLEGRO_KEY_A] && dx != 1) {
 		dx = -1;
 		dy = 0;
 		kuveve.push_back({ x, y, dx, dy });
+		kboard.last_key[ALLEGRO_KEY_A] = false;
 	}
 	else if (kboard.last_key[ALLEGRO_KEY_D] && dx != -1) {
 		dx = 1;
 		dy = 0;
 		kuveve.push_back({ x, y, dx, dy });
+		kboard.last_key[ALLEGRO_KEY_D] = false;
 	}
 	else if (kboard.last_key[ALLEGRO_KEY_W] && dy != 1) {
 		dx = 0;
 		dy = -1;
 		kuveve.push_back({ x, y, dx, dy });
+		kboard.last_key[ALLEGRO_KEY_W] = false;
 	}
 	else if (kboard.last_key[ALLEGRO_KEY_S] && dy != -1) {
 		dx = 0;
 		dy = 1;
 		kuveve.push_back({ x, y, dx, dy });
+		kboard.last_key[ALLEGRO_KEY_S] = false;
 	}
 		
 }
 void player::go()
 {
-	map[y][x] = 1;
-	map[ly][lx] = 0;
-
+	
 	x += dx * speed;
 	y += dy * speed;
 
-	lx += ldx * speed;
-	ly += ldy * speed;
+	if (x >= max_x || x <= -1 || y >= max_y || y <= -1) {
+		life = false;
+	} else if (map[y][x] == 2)
+		len++;
+	else {
+		lx += ldx * speed;
+		ly += ldy * speed;
+	}
+	if (map[y][x] == 1) {
+		life = false;
+	}
+
+	map[y][x] = 1;
+	map[ly][lx] = 0;
 
 	int tx, ty, tdx, tdy;
 	if (!kuveve.empty()) {
@@ -149,21 +153,21 @@ void player::go()
 }
 void player::draw()
 {
-	al_draw_filled_rectangle(lx * title_size, ly * title_size, lx * title_size + title_size, ly * title_size + title_size, al_map_rgb(150, 150, 150));
 	al_draw_filled_rectangle(x * title_size, y * title_size, x * title_size + title_size, y * title_size + title_size, al_map_rgb(255, 255, 255));
 
 }
 
 player snake;
 
+void gen_apple();
+
 int main()
 {
-
+	srand(time(0));
 	ALLEGRO_EVENT ev;
 	ALLEGRO_EVENT_QUEUE* event_queue = NULL;
 	ALLEGRO_TIMER* fps = NULL;
 	ALLEGRO_TIMER* cps = NULL;
-	bool flag_cps = false;
 
 	if (!al_init()) exit(1);
 	display = al_create_display(width, height);
@@ -236,28 +240,31 @@ int main()
 				draw = true;
 
 
-				snake.control();
 				
 				
-
-				if (flag_cps) {
-					snake.go();
-					flag_cps = false;
-				}
 				
 				mouse_click = 0;
-				kboard.last_key_refresher();
 			}
 			if (ev.timer.source == cps) {
-				flag_cps = true;
+				if (snake.life) {
+					snake.control();
+					snake.go();
+					gen_apple();
+				}
 			}
 		}
 
 		if (draw && al_is_event_queue_empty(event_queue)) {      // ��������� 
 			draw = false;
-			//al_clear_to_color(al_map_rgb(0, 0, 0));
-			al_draw_filled_rectangle(0,0,width,height,al_map_rgba(0,0,0,10));
-
+			al_clear_to_color(al_map_rgb(0, 0, 0));
+			//al_draw_filled_rectangle(0,0,width,height,al_map_rgba(0,0,0,10));
+			if (!snake.life) {
+				map[2][4] = 2; map[2][5] = 2; map[2][6] = 2; map[2][9] = 2; map[2][12] = 2;  map[2][14] = 2; map[2][16] = 2; map[2][17] = 2; map[2][18] = 2;  map[2][22] = 2; map[2][25] = 2; map[2][27] = 2; map[2][29] = 2;  map[2][30] = 2; map[2][31] = 2; map[2][33] = 2; map[2][34] = 2; map[2][35] = 2;
+				map[3][4] = 2; map[3][8] = 2; map[3][10] = 2; map[3][12] = 2; map[3][13] = 2; map[3][14] = 2; map[3][16] = 2; map[3][21] = 2; map[3][23] = 2; map[3][25] = 2; map[3][27] = 2; map[3][29] = 2; map[3][33] = 2; map[3][35] = 2;
+				map[4][4] = 2; map[4][8] = 2; map[4][9] = 2; map[4][10] = 2; map[4][12] = 2; map[4][14] = 2; map[4][16] = 2; map[4][17] = 2; map[4][18] = 2; map[4][21] = 2; map[4][23] = 2; map[4][25] = 2; map[4][27] = 2; map[4][29] = 2; map[4][30] = 2; map[4][31] = 2; map[4][33] = 2; map[4][34] = 2; map[4][35] = 2;
+				map[5][4] = 2; map[5][6] = 2; map[5][8] = 2; map[5][10] = 2; map[5][12] = 2; map[5][14] = 2; map[5][16] = 2; map[5][21] = 2; map[5][23] = 2; map[5][25] = 2; map[5][27] = 2; map[5][29] = 2; map[5][33] = 2; map[5][34] = 2;
+				map[6][4] = 2; map[6][5] = 2; map[6][6] = 2; map[6][8] = 2; map[6][10] = 2; map[6][12] = 2; map[6][14] = 2; map[6][16] = 2; map[6][17] = 2; map[6][18] = 2; map[6][22] = 2; map[6][26] = 2; map[6][29] = 2; map[6][30] = 2; map[6][31] = 2; map[6][33] = 2; map[6][35] = 2;
+			}
 			draw_map();
 
 			snake.draw();
@@ -286,9 +293,28 @@ void draw_map()
 	}
 	for (int y = 0; y < max_y; ++y) {
 		for (int x = 0; x < max_x; ++x) {
-			 if (map[y][x] == 1)
+			if (map[y][x] == 1)
 				al_draw_filled_rectangle(x * title_size, y * title_size, x * title_size + title_size, y * title_size + title_size, al_map_rgb(200, 200, 200));
+		}
+	}
+	for (int y = 0; y < max_y; ++y) {
+		for (int x = 0; x < max_x; ++x) {
+			if (map[y][x] == 2)
+				al_draw_filled_rectangle(x * title_size, y * title_size, x * title_size + title_size, y * title_size + title_size, al_map_rgb(255, 0, 0));
 		}
 	}
 }
 
+void gen_apple()
+{
+	int rx, ry;
+	do
+	{
+		rx = rand() % max_x;
+		ry = rand() % max_y;
+
+	} while (map[ry][rx] != 0);
+
+	map[ry][rx] = 2;
+
+}

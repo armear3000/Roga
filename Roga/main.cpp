@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+п»ї#define _CRT_SECURE_NO_WARNINGS
 
 #include <cstdlib>
 #include <allegro5/allegro.h>
@@ -39,7 +39,7 @@ ALLEGRO_FONT* font24 = NULL;
 using namespace std;
 ////////////////////
 
-// сетка 40 на 30
+// пїЅпїЅпїЅпїЅпїЅ 40 пїЅпїЅ 30
 const int max_x = 40;
 const int max_y = 30;
 const int title_size = 20;
@@ -203,13 +203,13 @@ int main()
 
 	for (; !done;) {
 		al_wait_for_event(event_queue, &ev);
-		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {            // закрытие окна
+		if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 			done = true;
 		}
 
 		mouse.CoordinatesInit(ev);
 
-		// обработка мыши
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
 			mouse.key[ev.mouse.button - 1] = true;
 			mouse_click = ev.mouse.button;
@@ -220,7 +220,7 @@ int main()
 			mouse.key[ev.mouse.button - 1] = false;
 		}
 
-		// обработка клавиатуры 
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
 		if (ev.type == ALLEGRO_EVENT_KEY_DOWN) {
 			kboard.key[ev.keyboard.keycode] = true;
 
@@ -230,7 +230,7 @@ int main()
 		}
 
 
-		if (ev.type == ALLEGRO_EVENT_TIMER) {                    // игровой процесс
+		if (ev.type == ALLEGRO_EVENT_TIMER) {                    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			
 			if (ev.timer.source == fps) {
 				draw = true;
@@ -250,7 +250,7 @@ int main()
 			}
 		}
 
-		if (draw && al_is_event_queue_empty(event_queue)) {      // отрисовка 
+		if (draw && al_is_event_queue_empty(event_queue)) {      // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
 			draw = false;
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 			//al_draw_filled_rectangle(0,0,width,height,al_map_rgba(0,0,0,10));
@@ -264,7 +264,7 @@ int main()
 		}
 	}
 
-	// конец работы 
+	// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 
 
 	al_destroy_font(font24);
 	al_destroy_timer(fps);

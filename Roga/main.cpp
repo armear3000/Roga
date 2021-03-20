@@ -196,8 +196,8 @@ int main()
 
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 
-	font24 = al_load_font("resources/bin/BRUSH-N.TTF", 24, 0);
-	if (!font24) abort_example("Error load fail. Resources/bin/BRUSH-N.TTF.");
+	font24 = al_load_font("resources/BRUSH-N.TTF", 24, 0);
+	if (!font24) abort_example("Error load fail: resources/BRUSH-N.TTF.");
 
 	////////////////// init
 

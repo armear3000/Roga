@@ -171,6 +171,7 @@
   <ItemGroup>
     <ClInclude Include="DevicesAndButtons.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="SystemFun.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

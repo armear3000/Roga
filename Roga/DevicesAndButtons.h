@@ -46,12 +46,21 @@ class keyboards
 public:
 	
 	bool key[ALLEGRO_KEY_MAX];
+	bool last_key[ALLEGRO_KEY_MAX];
+	void last_key_refresher();
 	keyboards();
 };
 keyboards::keyboards()
 {
-	for (int i = 0; i < ALLEGRO_KEY_MAX; i++) key[i] = false;
-	return;
+	for (int i = 0; i < ALLEGRO_KEY_MAX; i++) {
+		key[i] = false;
+		last_key[i] = false;
+	}
+}
+void keyboards::last_key_refresher() {
+	for (int i = 0; i < ALLEGRO_KEY_MAX; i++) {
+		last_key[i] = false;
+	}
 }
 
 

@@ -57,7 +57,7 @@ class player
 public:
 	player();
 	~player();
-
+	
 	bool life;
 	int len;
 	int x, y;
@@ -65,7 +65,7 @@ public:
 	int lx, ly;
 	int ldx, ldy;
 	int speed;
-	deque<tuple<int, int, int, int>> kuveve;
+	deque<tuple<int,int,int,int>> kuveve;
 
 	void control();
 	void go();
@@ -118,18 +118,17 @@ void player::control()
 		kuveve.push_back({ x, y, dx, dy });
 		kboard.last_key[ALLEGRO_KEY_S] = false;
 	}
-
+		
 }
 void player::go()
 {
-
+	
 	x += dx * speed;
 	y += dy * speed;
 
 	if (x >= max_x || x <= -1 || y >= max_y || y <= -1) {
 		life = false;
-	}
-	else if (map[y][x] == 2)
+	} else if (map[y][x] == 2)
 		len++;
 	else {
 		lx += ldx * speed;
@@ -236,14 +235,14 @@ int main()
 
 
 		if (ev.type == ALLEGRO_EVENT_TIMER) {                    // ������� �������
-
+			
 			if (ev.timer.source == fps) {
 				draw = true;
 
 
-
-
-
+				
+				
+				
 				mouse_click = 0;
 			}
 			if (ev.timer.source == cps) {
@@ -289,7 +288,7 @@ void draw_map()
 {
 	for (int y = 0; y < max_y; ++y) {
 		for (int x = 0; x < max_x; ++x) {
-			al_draw_rectangle(x * title_size, y * title_size, x * title_size + title_size, y * title_size + title_size, al_map_rgb(20, 20, 20), 1);
+				al_draw_rectangle(x * title_size, y * title_size, x * title_size + title_size, y * title_size + title_size, al_map_rgb(20, 20, 20), 1);
 		}
 	}
 	for (int y = 0; y < max_y; ++y) {

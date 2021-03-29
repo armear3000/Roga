@@ -20,7 +20,10 @@ class QVector;
 class QLine;
 
 bool CollideDetect(double x1_1, double y1_1, double x1_2, double y1_2, double x2_1, double y2_1, double x2_2, double y2_2);
+bool CollideDetect(double x1_1, double y1_1, double x1_2, double y1_2, double x2, double y2, double r2);
+bool CollideDetect(double x1, double y1, double r1, double x2_1, double y2_1, double x2_2, double y2_2);
 bool CollideDetect(double x1, double y1, double r1, double x2, double y2, double r2);
+
 double LenFrom1To2(double x1, double y1, double x2, double y2);
 double AngleToTarget(double x1, double y1, double x2, double y2);
 
@@ -162,7 +165,21 @@ QVector::QVector(QPoint a, QPoint b)
 	y = a.y - b.y;
 }
 
+bool CollideDetect(double x1_1, double y1_1, double x1_2, double y1_2, double x2, double y2, double r2){
+	
+	if (x2 > x1_2) {
+		if (y2 > y1_2) return CollideDetect(x2, y2, r2, x1_2, y1_2, 0);
+		if (y2 < y1_1) return CollideDetect(x2, y2, r2, x1_2, y1_1, 0);
+		return x2 - r2 <= x1_2;	
+	}
+	if (x2 < x1_1) {
+		if (y2 > y1_2) return CollideDetect(x2, y2, r2, x1_1, y1_2, 0);
+		if (y2 < y1_1) return CollideDetect(x2, y2, r2, x1_1, y1_1, 0);
+		return x2 - r2 <= x1_2;
+	}
+	return (y2 - r2 <= y1_2) && (y2 + r2 >= y1_1);
 
+}
 bool CollideDetect(double x1_1, double y1_1, double x1_2, double y1_2, double x2_1, double y2_1, double x2_2, double y2_2) {
 	double xmin, xmax, ymin, ymax;
 	xmin = MAX(x1_1, x2_1);
@@ -171,7 +188,7 @@ bool CollideDetect(double x1_1, double y1_1, double x1_2, double y1_2, double x2
 	ymax = MIN(y1_2, y2_2);
 	if (xmin >= xmax || ymin >= ymax)return false;
 	return true;
-};
+}
 bool CollideDetect(double x1, double y1, double r1, double x2, double y2, double r2) {
 	return LenFrom1To2(x1, y1, x2, y2) < (r1 + r2);
 }

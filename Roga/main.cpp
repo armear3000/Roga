@@ -98,42 +98,35 @@ balls::balls()
 	x = width / 2;
 	y = height - 150.0;
 	r = 5;
-	dx = 0;
-	dy = 0;
-	speed = 3;
+	speed = 6;
 	angle = 300;
+
+	dx = cos(angle / FROMRADTOGRAD);
+	dy = sin(angle / FROMRADTOGRAD);
 }
 balls::~balls()
 {
 }
 void balls::mathrun()
 {
-	
-	dx = cos(angle / FROMRADTOGRAD);
-	dy = sin(angle / FROMRADTOGRAD);
-
 	x += dx*speed;
 	y += -dy*speed;
-
+	
 	if (x + r > width) {
 		dx = -dx;
-		angle = atan2(y - (y - dy), x - (x - dx)) * FROMRADTOGRAD;
-		x = width - r - 1;
-	}else if (x - r < 0) {
-		dx = -dx;
-		angle = atan2(y - (y - dy), x - (x - dx)) * FROMRADTOGRAD;
-		x = 0 + r + 1;
-
+		x = width - r;
 	}
-	
+	else if (x - r < 0) {
+		dx = -dx;
+		x = r;
+	}
 	if (y + r > height) {
 		dy = -dy;
-		angle = atan2(y - (y - dy), x - (x - dx)) * FROMRADTOGRAD;
-		y = height - r - 1;
-	}else if (y - r < 0) {
+		y = height - r;
+	}
+	else if (y - r < 0) {
 		dy = -dy;
-		angle = atan2(y - (y - dy), x - (x - dx)) * FROMRADTOGRAD;
-		y = 0 + r + 1;
+		y = r;
 	}
 	
 
@@ -146,7 +139,6 @@ void balls::draw()
 	al_draw_textf(font24, al_map_rgb(255, 255, 255), x + r, y - 24, 0, "dx: %.4f", dx);
 	al_draw_textf(font24, al_map_rgb(255, 255, 255), x + r, y - 48, 0, "dy: %.4f", dy);
 
-	al_draw_textf(font24, al_map_rgb(255, 255, 255), x + r, y, 0, "anlge: %.2f", angle);
 	al_draw_line(x, y, x + r + 50, y, al_map_rgb(255, 255, 255), 1);
 	al_draw_circle(x, y, r + 50, al_map_rgb(255, 255, 255), 1);
 }
@@ -227,8 +219,6 @@ int main()
 
 			if (ev.timer.source == fps) {
 				draw = true;
-
-				if (kboard.key[ALLEGRO_KEY_SPACE]) ball.speed = 0; else ball.speed = 3;
 
 				p.control();
 				p.mathrun();

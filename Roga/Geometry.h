@@ -175,7 +175,7 @@ bool CollideDetect(double x1_1, double y1_1, double x1_2, double y1_2, double x2
 	if (x2 < x1_1) {
 		if (y2 > y1_2) return CollideDetect(x2, y2, r2, x1_1, y1_2, 0);
 		if (y2 < y1_1) return CollideDetect(x2, y2, r2, x1_1, y1_1, 0);
-		return x2 - r2 <= x1_2;
+		return x2 + r2 >= x1_1;
 	}
 	return (y2 - r2 <= y1_2) && (y2 + r2 >= y1_1);
 

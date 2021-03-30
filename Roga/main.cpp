@@ -98,11 +98,10 @@ balls::balls()
 	x = width / 2;
 	y = height - 150.0;
 	r = 5;
+	dx = 0;
+	dy = 0;
 	speed = 3;
 	angle = 300;
-
-	dx = cos(angle / FROMRADTOGRAD);
-	dy = sin(angle / FROMRADTOGRAD);
 }
 balls::~balls()
 {
@@ -110,24 +109,31 @@ balls::~balls()
 void balls::mathrun()
 {
 	
+	dx = cos(angle / FROMRADTOGRAD);
+	dy = sin(angle / FROMRADTOGRAD);
 
 	x += dx*speed;
 	y += -dy*speed;
 
 	if (x + r > width) {
 		dx = -dx;
-		x = width - r;
+		angle = atan2(y - (y - dy), x - (x - dx)) * FROMRADTOGRAD;
+		x = width - r - 1;
 	}else if (x - r < 0) {
 		dx = -dx;
-		x = r;
+		angle = atan2(y - (y - dy), x - (x - dx)) * FROMRADTOGRAD;
+		x = 0 + r + 1;
+
 	}
-	if (y + r > height){
+	
+	if (y + r > height) {
 		dy = -dy;
-		y = height - r;
-	}
-	else if (y - r < 0) {
+		angle = atan2(y - (y - dy), x - (x - dx)) * FROMRADTOGRAD;
+		y = height - r - 1;
+	}else if (y - r < 0) {
 		dy = -dy;
-		y = r;
+		angle = atan2(y - (y - dy), x - (x - dx)) * FROMRADTOGRAD;
+		y = 0 + r + 1;
 	}
 	
 

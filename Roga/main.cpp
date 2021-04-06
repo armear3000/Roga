@@ -49,18 +49,15 @@ public:
 	player();
 	~player();
 	void draw();
-	void control();
 	void mathrun();
-private:
-	double x, y, w, h, speed;
+	double x, y, w, h;
 };
 player::player()
 {
-	y = double(height) - 100;
+	y = double(height) - 40;
 	x = double(width)/2 - 50;
-	w = 100;
+	w = 200;
 	h = 20;
-	speed = 0;
 
 }
 player::~player()
@@ -68,19 +65,21 @@ player::~player()
 }
 void player::draw()
 {
+	double c1 = x + w / 5 * 2;
+	double c2 = x + w / 5 * 3;
+	al_draw_circle(c1, y, 3, al_map_rgb(0, 255, 0), 2);
+	al_draw_circle(c2, y, 3, al_map_rgb(0, 255, 0), 2);
 	al_draw_rectangle(x, y, x + w, y + h, al_map_rgb(255, 255, 255),2);
 }
-void player::control()
-{
-	speed = -kboard.key[ALLEGRO_KEY_A] + kboard.key[ALLEGRO_KEY_D];
 
-}
 void player::mathrun()
 {
-	x += speed*4;
+	x = mouse.x - w/2;
 	if (x < 0) x = 0;
 	else if (x + w > width) x = width - w;
 }
+
+player p;
 
 class balls
 {
@@ -98,11 +97,11 @@ balls::balls()
 	x = width / 2;
 	y = height - 150.0;
 	r = 5;
-	speed = 6;
+	speed = 4;
 	angle = 300;
 
-	dx = cos(angle / FROMRADTOGRAD);
-	dy = sin(angle / FROMRADTOGRAD);
+	dx = 1;
+	dy = -1;
 }
 balls::~balls()
 {
@@ -110,7 +109,7 @@ balls::~balls()
 void balls::mathrun()
 {
 	x += dx*speed;
-	y += -dy*speed;
+	y += dy*speed;
 	
 	if (x + r > width) {
 		dx = -dx;
@@ -128,8 +127,24 @@ void balls::mathrun()
 		dy = -dy;
 		y = r;
 	}
-	
+	if (CollideDetect(p.x,p.y, p.x + p.w, p.y + p.h, x, y, r)){
+		
+		double c1 = p.x + p.w / 5 * 2;
+		double c2 = p.x + p.w / 5 * 3;
 
+		if (x < c1) {
+			dx = -1;
+			dy = -1;
+		}
+		if (x >= c1 && x <= c2) {
+			dx = 0;
+			dy = -1;
+		}
+		if (x > c2) {
+			dx = 1;
+			dy = -1;
+		}
+	}
 }
 void balls::draw()
 {
@@ -143,7 +158,6 @@ void balls::draw()
 	al_draw_circle(x, y, r + 50, al_map_rgb(255, 255, 255), 1);
 }
 
-player p;
 balls ball;
 
 int main()
@@ -220,7 +234,6 @@ int main()
 			if (ev.timer.source == fps) {
 				draw = true;
 
-				p.control();
 				p.mathrun();
 
 				ball.mathrun();

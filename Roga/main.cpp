@@ -43,6 +43,48 @@ ALLEGRO_FONT* font24 = NULL;
 
 ////////////////////
 
+class block
+{
+public:
+	block();
+	~block();
+
+	double x, y, w, h;
+	bool life;
+	void die();
+	void SetCor(double x, double y);
+	void Draw();
+};
+block::block()
+{
+	w = 50;
+	h = 25;
+	life = true;
+}
+block::~block()
+{
+}
+void block::die()
+{
+	life = false;
+}
+void block::SetCor(double x, double y)
+{
+	this->x = x;
+	this->y = y;
+}
+void block::Draw()
+{
+	if(life)
+		al_draw_filled_rectangle(x, y, x + w, y + h, al_map_rgb(rand() % 255, 0, 0));
+}
+
+block blocks[50];
+int maxX = 10, maxY = 5;
+int Nb = 50;
+void GenerateBlocks();
+void DrawBlocks();
+
 class player
 {
 public:
@@ -71,7 +113,6 @@ void player::draw()
 	al_draw_circle(c2, y, 3, al_map_rgb(0, 255, 0), 2);
 	al_draw_rectangle(x, y, x + w, y + h, al_map_rgb(255, 255, 255),2);
 }
-
 void player::mathrun()
 {
 	x = mouse.x - w/2;
@@ -97,10 +138,10 @@ balls::balls()
 	x = width / 2;
 	y = height - 150.0;
 	r = 5;
-	speed = 4;
+	speed = 8;
 	angle = 300;
 
-	dx = 1;
+	dx = 0;
 	dy = -1;
 }
 balls::~balls()
@@ -108,6 +149,8 @@ balls::~balls()
 }
 void balls::mathrun()
 {
+	double tempX = x;
+	double tempY = y;
 	x += dx*speed;
 	y += dy*speed;
 	
@@ -131,19 +174,56 @@ void balls::mathrun()
 		
 		double c1 = p.x + p.w / 5 * 2;
 		double c2 = p.x + p.w / 5 * 3;
+		double w = p.w / 5 * 2;
 
 		if (x < c1) {
-			dx = -1;
-			dy = -1;
+			dx = cos(((45 / w) * (c1 - x) + 90) / FROMRADTOGRAD);
+			dy = -sin(((45 / w) * (c1 - x) + 90) / FROMRADTOGRAD);
 		}
 		if (x >= c1 && x <= c2) {
 			dx = 0;
 			dy = -1;
 		}
 		if (x > c2) {
-			dx = 1;
-			dy = -1;
+			dx = cos((-(45 / w) * (x - c2) + 90) / FROMRADTOGRAD); 
+			dy = -sin((-(45 / w) * (x - c2) + 90) / FROMRADTOGRAD);
 		}
+	}
+	for (int i = 0; i < Nb; ++i) {
+		if (blocks[i].life && CollideDetect(blocks[i].x, blocks[i].y, blocks[i].x + blocks[i].w, blocks[i].y + blocks[i].h, x, y, r)) {
+			blocks[i].die();
+			if (tempX  < blocks[i].x) {
+				if (tempY < blocks[i].y) {
+					dy = -dy;
+				}
+				else if (tempY > blocks[i].y + blocks[i].h) {
+					dy = -dy;
+				}
+				else {
+					dx = -dx;
+				}
+			}
+			else if (tempX > blocks[i].x + blocks[i].w) {
+				if (tempY < blocks[i].y) {
+					dy = -dy;
+				}
+				else if (tempY > blocks[i].y + blocks[i].h) {
+					dy = -dy;
+				}
+				else {
+					dx = -dx;
+				}
+			}
+			else if (tempY < blocks[i].y) {
+				dy = -dy;
+			
+			}
+			else {
+				dy = -dy;
+			}
+			
+		}
+	
 	}
 }
 void balls::draw()
@@ -154,11 +234,17 @@ void balls::draw()
 	al_draw_textf(font24, al_map_rgb(255, 255, 255), x + r, y - 24, 0, "dx: %.4f", dx);
 	al_draw_textf(font24, al_map_rgb(255, 255, 255), x + r, y - 48, 0, "dy: %.4f", dy);
 
-	al_draw_line(x, y, x + r + 50, y, al_map_rgb(255, 255, 255), 1);
-	al_draw_circle(x, y, r + 50, al_map_rgb(255, 255, 255), 1);
+
+	al_draw_line(x, y, x + dx * (r + 50), y, al_map_rgb(0, 255, 0), 2);
+	al_draw_line(x, y, x, y + dy * (r + 50), al_map_rgb(0, 255, 0), 2);
+
+	al_draw_circle(x, y, r + 50, al_map_rgb(150, 150, 150), 1);
 }
 
 balls ball;
+
+
+
 
 int main()
 {
@@ -199,6 +285,7 @@ int main()
 
 	bool done = false, draw = false;
 	al_start_timer(fps);
+	GenerateBlocks();
 
 	for (; !done;) {
 		al_wait_for_event(event_queue, &ev);
@@ -247,7 +334,8 @@ int main()
 			draw = false;
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 			//al_draw_filled_rectangle(0,0,width,height,al_map_rgba(0,0,0,10));
-			 
+			DrawBlocks();
+
 			p.draw();
 			ball.draw();
 
@@ -262,4 +350,28 @@ int main()
 	al_destroy_display(display);
 	al_destroy_event_queue(event_queue);
 	return 0;
+}
+
+
+void GenerateBlocks()
+{
+	int i = 0;
+	double coretX = width / 2 - maxX/2* blocks[0].w;
+
+	for (int y = 0; y < maxY; ++y) {
+		for (int x = 0; x < maxX; ++x) {
+			blocks[i].SetCor(x * blocks[i].w + coretX, y * blocks[i].h + 50);
+			i++;
+		}
+	}
+}
+void DrawBlocks()
+{
+	int i = 0;
+	for (int y = 0; y < maxY; ++y) {
+		for (int x = 0; x < maxX; ++x) {
+			blocks[i].Draw();
+			i++;
+		}
+	}
 }
